@@ -1,0 +1,251 @@
+1. pd.read_csv("文件路径") 读取 CSV 格式的文件，生成 DataFrame
+若文件不在当前文件夹，需写完整路径（如 D:/data/air_pollution.csv）
+可加参数处理特殊格式（如 encoding="utf-8" 解决中文乱码，sep=";" 用分号分隔的 CSV）
+
+
+
+1.5 df.to_csv(
+    "保存的文件路径.csv",  # 文件名
+    index=False,          # 不保存行索引（避免多出一列无意义的数字）
+    encoding="utf-8-sig"  # 解决中文乱码问题（Windows 必加）
+)
+路径可以是绝对路径（如 "C:/Users/xxx/Desktop/保存的文件.csv"）或相对路径
+
+
+
+2. df.head(n)
+查看DataFrame的前n行数据，同时快速预览数据的表头
+默认查看前5行
+
+df.tail()
+查看DateFrame的后5行
+
+
+
+
+3. df.info()
+查看 DataFrame 的「基础信息」
+举例：
+<class 'pandas.core.frame.DataFrame'>    # 说明当前处理的对象是pandas的DataFrame 类型（也就是表格型数据）
+
+RangeIndex: 6985 entries, 0 to 6984    # 数据总共有6985行，索引从0到6984
+
+Data columns (total 9 columns):    # 数据总共才9列并列出每列的信息
+
+ #   Column   Non-Null Count  Dtype    # 第三列是非空值数量，第四列是数据类型
+---  ------   --------------  -----    # 数据类型决定能对这列进行什么操作
+ 0   city     6985 non-null   object 
+ 1   country  6985 non-null   object   # object是字符串、float64是数值、datetime64是时间
+ 2   2017     2133 non-null   float64
+ 3   2018     2304 non-null   float64
+ 4   2019     3648 non-null   float64
+ 5   2020     3860 non-null   float64
+ 6   2021     6199 non-null   float64
+ 7   2022     6985 non-null   float64
+ 8   2023     6985 non-null   float64
+dtypes: float64(7), object(2)    # 有7列浮点型数值，有2列是文本类型
+
+memory usage: 491.3+ KB    # 这份DataFrame所占内存，一般只有几百万行数据才考虑内存优化
+None    # df.info()是一个只打印信息、不返回结果的函数，在交互式环境中，函数执行完后会显示 None，完全正常
+
+
+
+
+4. df.describe()
+对DataFrame中的数值型列做统计描述，输出 计数、均值、标准差、最值、分位数
+只对数值型列生效（自动跳过字符串 / 时间列）
+
+
+
+5. df.isnull().sum()
+统计DataFrame每列的缺失值数量（先判断每个单元格是否缺失，再求和）
+
+df.isnull()：返回和 df 同形状的布尔矩阵（缺失值为True，非缺失为False）
+.sum()：对每列的布尔值求和（True=1，False=0），即每列缺失值个数
+
+
+
+6. df.fillna(填充值)
+
+例如用PM2.5列的中位数填充该列缺失值
+df["PM2.5"] = df["PM2.5"].fillna(df["PM2.5"].median())
+填充值需和列类型匹配
+
+
+
+7. df.interpolate(method="linear")
+用插值法填充缺失值（适合时间序列数据，保留数据趋势，比直接填均值更准确）
+
+method="linear"：线性插值（根据缺失值前后的数值，按比例补中间值）
+必须先将时间列转为 datetime 类型，插值才会按时间顺序生效
+
+
+
+8. df.dropna(subset=【列名】)
+删除包含缺失值的行，常用于非数值列，如地区、监测点名称，无法用数值填充
+指定的话哪些列有缺失就删行，不指定得话则删除所有列有缺失的行
+
+
+
+9. df.drop_duplicates(subset=[列名], keep="first")
+删除重复行
+不指定 subset：删除 “所有列值都完全相同” 的行
+keep="first"：保留重复行中的第一条，keep="last" 保留最后一条
+对应代码中删除重复记录，避免重复数据拉高统计结果（如同一时间的浓度被计算多次）
+
+
+
+10. pd.to_datetime(df["时间列"],format="%Y-%m-%d %H:%M:%S")
+将DataFrame中的字符串时间列转为datetime类型
+format：指定原始时间字符串的格式（如 %Y 是 4 位年份，%m 是 2 位月份，%H 是 24 小时制小时）
+
+
+
+11. df["datetime列"].dt.date/month/hour
+从 datetime 类型的列中，提取日期/月份/小时
+必须先转换为datatime类型
+
+df["date"] = df["time"].dt.date   提取日期（如 2024-05-20）
+df["month"] = df["time"].dt.month   提取月份（1-12）
+df["hour"] = df["time"].dt.hour    提取小时（0-23）
+
+
+
+12. pd.cut(df["数值列"], bins=分界点, labels=标签)
+将数值列按指定分界点分成多个类别，生成新的分类列
+
+将month列（1-12）按月份分成“四季”，生成season列
+df["season"] = pd.cut(
+    df["month"],
+    bins=[0, 2, 5, 8, 11, 12],  # 分界点：0-2月、3-5月...
+    labels=["冬季", "春季", "夏季", "秋季", "冬季"]  # 对应标签
+)
+
+bins：必须是从小到大的分界点列表
+
+labels标签数量需比bins少 1（如 bins 有 6 个点，分 5 组， labels 需 5 个）
+
+
+
+13. df.astype(目标类型)
+将DataFrame中指定列的数据类型转为目标类型
+
+例如：df["area"] = df["area"].astype("category")
+将area列（字符串）转为category类型（减少内存占用，加速分组）
+
+目标类型需兼容原数据（如不能将字符串 “abc” 转为 int）
+category 类型适合 “重复值多的列”（如地区列），能大幅减少内存占用
+对应代码中处理地区、监测点类型列，优化数据存储和分析速度
+
+
+
+14. df.groupby(分组列).聚合函数()
+按「分组列」（如地区、月份）对数据分组，再对每组计算聚合结果（均值、总和等），是 “分组统计的核心”
+
+# 按「季节」分组，计算每组 PM2.5、PM10、SO2 的均值
+seasonal_avg = df.groupby("season")[["PM2.5", "PM10", "SO2"]].mean()
+
+先写 groupby(分组列)，再指定要统计的「数值列」（如 [["PM2.5", "PM10"]]），最后写聚合函数（mean() 均值、sum() 总和、count() 计数）；
+对应代码中计算 “季节均值”“地区均值”，用于分析 “时间 / 空间差异”。
+
+
+
+15. df.pivot_table(index=行分组列, columns=列分组列, values=值列, aggfunc=聚合函数)
+生成「透视表」，实现 “双维度分组统计”（如行是地区、列是月份，值是超标率），比 groupby 更适合 “二维分析”。
+
+# 行：地区，列：月份，值：PM2.5 超标率（均值），生成透视表
+exceed_pivot = df.pivot_table(
+    index="area", 
+    columns="month", 
+    values="PM2.5_exceed", 
+    aggfunc="mean"
+) * 100
+index：透视表的 “行”（如地区），columns：透视表的 “列”（如月份）；
+对应代码中生成 “地区 × 月份” 的超标率透视表，用于后续画热力图。
+
+
+
+16. df[数值列列表].corr()
+计算「多个数值列之间的相关系数」（范围 -1~1），分析变量间的线性关系（如 PM2.5 与 PM10 是否正相关）。
+
+# 计算核心污染物（PM2.5、PM10、SO2 等）的相关系数矩阵
+corr_matrix = df[["PM2.5", "PM10", "SO2", "NO2", "O3"]].corr()
+
+相关系数越接近 1：正相关越强（如 PM2.5 升高时 PM10 也升高）；
+越接近 -1：负相关越强（如 O3 升高时 NO2 降低）；
+对应代码中分析 “污染物之间的关联”，判断是否有共同来源（如 PM2.5 与 PM10 同属颗粒物，相关系数高）。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------
+
+可视化类方法
+
+1. df.plot(kind=图表类型, ...)
+快速绘制「折线图、柱状图、水平柱状图」等，基于 matplotlib 封装，适合简单可视化。
+
+# 绘制 PM2.5 月度均值的折线图（带标记点）
+monthly_avg.plot(kind="line", marker="o", color="#E74C3C", figsize=(12, 6))
+
+kind：指定图表类型（"line" 折线图、"bar" 柱状图、"barh" 水平柱状图）；
+常配合 figsize=(宽, 高) 调整图表大小，marker="o" 加数据标记点；
+对应代码中绘制 “月度趋势折线图”“地区均值水平柱状图”。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
