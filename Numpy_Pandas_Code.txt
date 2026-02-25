@@ -3,6 +3,10 @@
 可加参数处理特殊格式（如 encoding="utf-8" 解决中文乱码，sep=";" 用分号分隔的 CSV）
 
 
+1.25 df=pd.DataFrame(),创建一个空的DataFrame
+
+df["列名"]=0，创建一个列并赋值
+
 
 1.5 df.to_csv(
     "保存的文件路径.csv",  # 文件名
@@ -10,6 +14,32 @@
     encoding="utf-8-sig"  # 解决中文乱码问题（Windows 必加）
 )
 路径可以是绝对路径（如 "C:/Users/xxx/Desktop/保存的文件.csv"）或相对路径
+
+
+
+
+
+7. new_df = df[['用户ID (User ID)', '博主ID (Blogger ID)', '观看量']]
+从DataFrame中选择需要的列构建新的df
+
+new_df.columns = ['用户ID', '博主ID', '观看量']
+修改列名
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -73,25 +103,146 @@ df["PM2.5"] = df["PM2.5"].fillna(df["PM2.5"].median())
 
 
 
-7. df.interpolate(method="linear")
-用插值法填充缺失值（适合时间序列数据，保留数据趋势，比直接填均值更准确）
-
-method="linear"：线性插值（根据缺失值前后的数值，按比例补中间值）
-必须先将时间列转为 datetime 类型，插值才会按时间顺序生效
+6.25 df.drop(columns=["列名",],errors="ignore")
+drop默认删除行，除非通过columns参数删除列
+errors参数确保容错，指定列不存在的时候不会报错
 
 
 
-8. df.dropna(subset=【列名】)
+
+
+
+6.5. df.dropna(subset=【列名】)
 删除包含缺失值的行，常用于非数值列，如地区、监测点名称，无法用数值填充
 指定的话哪些列有缺失就删行，不指定得话则删除所有列有缺失的行
 
 
 
-9. df.drop_duplicates(subset=[列名], keep="first")
+6.75. df.drop_duplicates(subset=[列名], keep="first")
 删除重复行
 不指定 subset：删除 “所有列值都完全相同” 的行
 keep="first"：保留重复行中的第一条，keep="last" 保留最后一条
 对应代码中删除重复记录，避免重复数据拉高统计结果（如同一时间的浓度被计算多次）
+
+
+
+
+8. 选择单行
+df.loc["A"] 按照标签"A"
+输出：
+姓名    张三
+年龄    25
+城市    北京
+Name: A, dtype: object
+
+姓名  年龄  城市
+A  张三  25  北京     # 行标签A → 位置0
+B  李四  30  上海     # 行标签B → 位置1
+C  王五  35  广州     # 行标签C → 位置2
+
+列标签：姓名 年龄 城市 ，可以改列名
+行标签 A B C ，也可以自定义
+
+df.iloc[0],输出和上面完全一样，区别是一个按照数字找，一个按照标签找
+
+
+选择单列
+df.loc[:,"年龄"] :表示所有行
+
+df.iloc[:,1]  同上
+
+
+行切片（多行）
+df.loc["A":"B"]    loc切片是包含的闭区间为A,B
+
+df.iloc[0:2]    只包含0,1 左闭右开
+
+
+选取多行多列
+df.loc[["A", "C"], ["姓名", "城市"]]
+iloc同上。可看成矩阵
+
+
+
+
+
+9. 新建列 
+df["名字"]=0，默认值为0
+
+
+
+10. 条件筛选
+df.loc[df['用户行为'] == 1, '观看量'] = 1
+
+如果用户行为列值为1，则把观看量列的值设置为1
+
+
+df.loc[df["年龄"]> 30]   选取年龄大于30的行
+# 输出：
+#    姓名  年龄  城市
+# C  王五  35  广州
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7. df.interpolate(method="linear")
+用插值法填充缺失值（适合时间序列数据，保留数据趋势，比直接填均值更准确）
+
+method="linear"：线性插值（根据缺失值前后的数值，按比例补中间值）
+必须先将时间列转为 datetime 类型，插值才会按时间顺序生效
 
 
 
@@ -133,9 +284,30 @@ labels标签数量需比bins少 1（如 bins 有 6 个点，分 5 组， labels 
 例如：df["area"] = df["area"].astype("category")
 将area列（字符串）转为category类型（减少内存占用，加速分组）
 
+str 转换为字符串
+
 目标类型需兼容原数据（如不能将字符串 “abc” 转为 int）
 category 类型适合 “重复值多的列”（如地区列），能大幅减少内存占用
 对应代码中处理地区、监测点类型列，优化数据存储和分析速度
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -150,18 +322,126 @@ seasonal_avg = df.groupby("season")[["PM2.5", "PM10", "SO2"]].mean()
 
 
 
-15. df.pivot_table(index=行分组列, columns=列分组列, values=值列, aggfunc=聚合函数)
-生成「透视表」，实现 “双维度分组统计”（如行是地区、列是月份，值是超标率），比 groupby 更适合 “二维分析”。
+姓名	班级	语文	数学
+张三	一班	90	85
+李四	一班	88	92
+王五	二班	95	80
+赵六	二班	85	90
 
-# 行：地区，列：月份，值：PM2.5 超标率（均值），生成透视表
-exceed_pivot = df.pivot_table(
-    index="area", 
-    columns="month", 
-    values="PM2.5_exceed", 
-    aggfunc="mean"
-) * 100
-index：透视表的 “行”（如地区），columns：透视表的 “列”（如月份）；
-对应代码中生成 “地区 × 月份” 的超标率透视表，用于后续画热力图。
+如果执行 df.groupby('班级')，pandas 会把这张表拆成两个 “小表格”：
+「一班小组」：包含张三、李四的所有记录；
+「二班小组」：包含王五、赵六的所有记录。
+这就是 groupby 的核心 ——按指定列（或多列）的 “唯一值” 拆分数据，相同值的行归为同一个小组。
+
+
+单列分组	df.groupby('用户ID')	把同一用户的所有行为记录归为一组（不管对应哪个博主）
+
+多列分组	df.groupby(['用户ID', '博主ID'])	把同一用户对同一博主的所有行为记录归为一组（更精细的粒度）
+
+多列分组 + 日期	df.groupby(['用户ID', '博主ID', '日期'])	把同一用户在同一天对同一博主的行为记录归为一组
+
+不要直接打印 groupby 对象：print(df.groupby('用户ID')) 只会显示对象信息，看不到分组内容；想看小组数据可以用 df.groupby('用户ID').head(2)（看每个组的前 2 行）；
+多列分组后索引会变成分组键：需要用 reset_index() 还原为普通列（你之前代码里的关键步骤）；
+分组后聚合默认忽略空值：如果小组内有 NaN，sum/mean 会自动跳过，不影响统计结果。
+
+
+
+df = df.groupby(['用户ID', '博主ID']).apply(custom_agg).reset_index()
+
+apply遍历每个 “用户 + 博主” 分组，把该分组的所有数据传入 custom_agg 函数（你之前问的返回 pd.Series 的函数）
+
+apply 会收集所有分组的聚合结果（每个分组返回一个 pd.Series），并自动拼接成一个新的 DataFrame。
+
+此时新 DataFrame 的行索引是「用户 ID + 博主 ID」的组合（分组键），列是 custom_agg 返回的「观看量、点赞量、评论量、是否关注、日期」。
+
+
+.reset_index() —— 重置索引，规整数据结构
+
+groupby+apply 后，「用户 ID、博主 ID」会变成 DataFrame 的行索引（而非普通列），导致后续筛选 / 分析不便（比如无法直接用 df['用户ID'] 取值）；
+解决方式：reset_index() 会做两件事：
+把原来作为行索引的「用户 ID、博主 ID」还原成普通列；
+生成新的连续数字索引（0、1、2...），让数据结构回到标准的 DataFrame 形态。
+
+
+
+custom_agg 的返回值要求：必须返回一维结构（如 pd.Series），否则 apply 会生成嵌套数据（比如列里是字典 / 列表），无法形成规整的表格；
+reset_index() 不可省略：如果省略，「用户 ID、博主 ID」会留在索引中，后续做 df.query("用户ID == 1001") 会报错，必须还原为普通列；
+聚合粒度可控：如果想按「用户 ID + 博主 ID + 日期」汇总，只需把分组列改成 ['用户ID', '博主ID', '日期'] 即可，逻辑完全通用。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+14.1 若csv文件有几百万行，一次性阅读会占满内存，此时应采取分块读取
+预先设置一个chunk_size=n
+必须有循环，否则只会处理一块，然后只针对一块写功能就可以
+
+pd.read_csv(file_path, chunksize=chunk_size)
+
+
+
+14.2 pd.concat([final_df, chunk], ignore_index=True) 拼接块
+ignore_index保证没有索引，如果加的话会导致每一块都是0——n，而不是所有的块共用0-n
+是01234 01234，非01234 56789
+
+# 更优写法（减少concat次数）
+chunk_list = []
+for chunk in pd.read_csv(file_path, chunksize=chunk_size):
+    # 处理chunk的逻辑...
+    chunk_list.append(chunk)
+final_df = pd.concat(chunk_list, ignore_index=True)
+
+
+
+14.3 pd.concat()中第一个参数必须是包含多个待拼接对象的可迭代对象（比如列表、元组）
+而不能直接传单个 DataFrame
+
+pd.concat([df1, df2])	✅ 合法	传了包含 2 个 DataFrame 的列表，符合语法要求
+
+pd.concat(df1)	❌ 不合法	直接传单个 DataFrame，不是可迭代对象，会触发 TypeError
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -174,6 +454,40 @@ corr_matrix = df[["PM2.5", "PM10", "SO2", "NO2", "O3"]].corr()
 相关系数越接近 1：正相关越强（如 PM2.5 升高时 PM10 也升高）；
 越接近 -1：负相关越强（如 O3 升高时 NO2 降低）；
 对应代码中分析 “污染物之间的关联”，判断是否有共同来源（如 PM2.5 与 PM10 同属颗粒物，相关系数高）。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. pd.Series()是 pandas 中表示一维带标签的数据结构（可以通俗理解为 “带名字的一维数组”）
+
+每个值都对应一个「标签（键）」（比如 ' 观看量 ' 对应求和结果，' 日期 ' 对应日期值）；
+它是构成 DataFrame（二维表格）的基础 —— 一个 DataFrame 本质上是多个 Series 按列拼接而成；
+
+
+接收一个字典（键 = 列名，值 = 聚合结果），pd.Series 会把字典转换成带标签的一维数据
+
+
+
+
+
+
+
 
 
 
@@ -214,6 +528,19 @@ kind：指定图表类型（"line" 折线图、"bar" 柱状图、"barh" 水平�
 
 
 
+
+15. df.pivot_table(index=行分组列, columns=列分组列, values=值列, aggfunc=聚合函数)
+生成「透视表」，实现 “双维度分组统计”（如行是地区、列是月份，值是超标率），比 groupby 更适合 “二维分析”。
+
+# 行：地区，列：月份，值：PM2.5 超标率（均值），生成透视表
+exceed_pivot = df.pivot_table(
+    index="area", 
+    columns="month", 
+    values="PM2.5_exceed", 
+    aggfunc="mean"
+) * 100
+index：透视表的 “行”（如地区），columns：透视表的 “列”（如月份）；
+对应代码中生成 “地区 × 月份” 的超标率透视表，用于后续画热力图。
 
 
 
