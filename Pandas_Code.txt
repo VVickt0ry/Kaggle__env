@@ -1,112 +1,108 @@
 1. pd.read_csv("文件路径") 读取CSV格式的文件，生成DataFrame
 若文件不在当前文件夹，需写完整路径
-可加参数（如encoding="utf-8" 解决中文乱码，sep=";" 用分号分隔）
+可加一些参数,如encoding="utf-8" 解决中文乱码，sep=";" 用分号分隔
 
 
-
-1.125 pd.read_excel(..., header=None)
+1.2 pd.read_excel(..., header=None)
 若header=0（默认）：会把第一行[1001,2001,1,1]当作列名，第二行[1002,2001,1,0]当作数据
 若header=None：会把第一行也当作数据，列名默认是 0、1、2、3
 
 
-
-1.25 df.to_csv(
-    "文件路径.csv",   # 路径可以是绝对路径（如 "C:/Users/保存的文件.csv"）或相对路径
+1.3 df.to_csv(
+    "文件路径.csv",   # 路径可以是绝对路径或相对路径
     index=False,    # 不保存行索引
     encoding="utf-8"  
 )
 
 
-
-1.5 df=pd.DataFrame()   创建一个空的DataFrame
+1.4 df=pd.DataFrame()   创建一个空的DataFrame
 df["列名"]=0，新创建一个列并赋值
 df["列名"]=None，赋值的是缺失值NaN
 
 df = pd.DataFrame({'观看量': [1, 0, None]})
-print(df['观看量'].sum())  # 输出 1（0被计入求和，None/NaN被跳过）
-print(df['观看量'].count())  # 输出 2（0是有效值被计数，None/NaN不计）
-print(df['观看量'].mean())  # 输出 0.5（(1+0)/2，None跳过）
-df[列名] = np.nan等价于 df[列名]=None，更适配数值列   
+print(df['观看量'].sum())  # 输出1（0被计入求和，None/NaN被跳过）
+print(df['观看量'].count())  # 输出2（0是有效值被计数，None/NaN不计）
+print(df['观看量'].mean())  # 输出0.5（(1+0)/2，None跳过）
+df[列名] = np.nan等价于 df[列名]=None
 
 
 
-1.75 new_df = df[['User ID', 'Blogger ID', '观看量']]  从Df中选择需要的列构建新的df
+1.5 new_df = df[['User ID', 'Blogger ID', '观看量']]  从Df中选择需要的列构建新的df
 new_df.columns = ['用户ID', '博主ID', '观看量']   修改列名
 
 new_column_titles = ['用户ID', '时间 ']
 定义添加的新列标题
 
 new_columns = df.columns.tolist()
-.columns获取已有DataFrame的列名，返回的是pandas的Index对象（如 Index(['用户ID','博主ID','观看量','点赞量'], dtype='object')）
-.tolist()：将Index对象转为普通Python列表，最终new_columns是规范的列名列表（如 ['用户ID','博主ID','观看量','点赞量']）
+.columns获取已有df的列名，返回的是Index对象
+如Index(['用户ID','博主ID','观看量','点赞量'], dtype='object')
+.tolist()将Index对象转为列表，最终是规范的列名列表如 ['用户ID','博主ID','观看量','点赞量']
 
 
 
-1.875 new_column_titles = ['用户ID', '用户行为', '博主ID', '时间'] 要添加的新列标题列表及顺序
+1.6 new_column_titles = ['用户ID', '用户行为', '博主ID', '时间'] 要添加的列标题列表
 for title in new_column_titles:
     df.insert(len(df.columns), title, None) 循环插入新列到DataFrame末尾
 
-df.insert(loc, column, value)是向指定位置插入列
+df.insert(loc, column, value)向指定位置插入列
 loc（插入位置），column（列名），value（初始值）
-value不仅可以设为None，还能设为固定值（如 0、列表 / 数组（按行赋值）
-
+value不仅可以设为None，还能设为固定值如0、列表/数组（按行赋值）
 
 第二种方法添加列
 new_column_titles = ['用户ID', '用户行为', '博主ID', '时间']
-
 for title in new_column_titles:
-    df[title] = None   # 在 DataFrame 末尾添加新列，初始值设为 None
+    df[title] = None   # 在DataFrame末尾添加新列，初始值设为None
 
 
-------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-2. df.head(n)    查看DataFrame的前n行数据，同时快速预览数据的表头,默认查看前5行
+
+
+
+
+2. df.head(n)    查看DataFrame的前n行数据，快速预览数据的表头，默认查看前5行
 df.tail()    默认查看DateFrame的后5行
 
 
-
-2.5 df.query("用户ID == 1001")从df中筛选出所有用户ID列的值等于1001的行
-返回一个只包含这些行的新DataFrame（原df不会被修改,故需要保存）
+2.1 df.query("用户ID == 1001")从df中筛选出所有用户ID列的值等于1001的行
+返回一个只包含这些行的新DataFrame，原df不会被修改，故需要保存
 
 支持复杂多条件筛选
-df.query("用户ID == 1001 and 点赞量 > 0")    筛选用户1001且点赞量>0 的行
-df.query("用户ID in [1001, 1002]")      筛选用户1001 或 1002 的行
-df.query("用户ID == 1001 and (点赞量 > 0 or 评论量 > 0)") 
+df.query("用户ID == 1001 and 点赞量 > 0")    筛选用户1001且点赞量>0的行
+df.query("用户ID in [1001, 1002]")      筛选用户1001或1002的行
 
-筛选数值（如用户 ID）：直接写 == 1001；
-筛选字符串（如博主ID是字符串类型）：需加引号 → df.query("博主ID == '2001'")
+筛选字符串需加引号 → df.query("博主ID == '2001'")
 
 target_user = 1001
 df.query("用户ID == @target_user")      动态传入变量
-传统的布尔索引df[df["用户ID"] == 1001]较为繁琐且不易阅读
+传统的布尔索引df[df["用户ID"] == 1001]不易阅读
 
 
 
-2.75 df = pd.DataFrame(result) 和 df = pd.DataFrame() 
-两者都是创建DataFrame（二维表格），但核心差异在于是否有初始数据
+2.2 df= pd.DataFrame(result)和df= pd.DataFrame() 
+两者都是创建DataFrame，但核心差异在于是否有初始数据
 前者基于已有数据创建带内容的表格，后者创建完全空的表格
 
 df = pd.DataFrame(result)	
 把非DataFrame数据（字典/列表）转成表格，为已有DataFrame创建独立副本
 
-如果result本身已经是DataFrame，直接df = result也能赋值
-result = df.groupby(...).agg(...)  # result是DataFrame
+如果result本身已经是DataFrame，直接df=result也能赋值
+result = df.groupby(...).agg(...)  
+df1 = result      # 引用：修改df1['观看量']会改变result
+df2 = pd.DataFrame(result)      # 副本：修改 df2 不影响result
+df = pd.DataFrame() 创建的空表，没有列可赋值
 
-df1 = result  # 引用：修改 df1['观看量'] 会改变 result
-df2 = pd.DataFrame(result)  # 副本：修改 df2 不影响 result
-df = pd.DataFrame() 创建的空表，若直接执行 df['观看量'] = 1 会报错（无列可赋值）
 
------------------------------------------------------------------------------------------------------------------------------------------------------
 
-3. df.info()    查看DataFrame的基础信息
-举例：
-<class 'pandas.core.frame.DataFrame'>    # 说明当前处理的对象是pandas的DataFrame 类型（也就是表格型数据）
 
+
+
+
+
+3. df.info() 查看DataFrame的基础信息
+<class 'pandas.core.frame.DataFrame'>    # 当前处理的对象是pandas的DataFrame类型
 RangeIndex: 6985 entries, 0 to 6984    # 数据总共有6985行，索引从0到6984
-
-Data columns (total 9 columns):    # 数据总共才9列并列出每列的信息
-
+Data columns (total 9 columns):    # 数据总共9列并整理出每列的信息
  #   Column   Non-Null Count  Dtype    # 第三列是非空值数量，第四列是数据类型
 ---  ------   --------------  -----    # 数据类型决定能对这列进行什么操作
  0   city     6985 non-null   object 
@@ -119,42 +115,122 @@ Data columns (total 9 columns):    # 数据总共才9列并列出每列的信息
  7   2022     6985 non-null   float64
  8   2023     6985 non-null   float64
 dtypes: float64(7), object(2)    # 有7列浮点型数值，有2列是文本类型
-
 memory usage: 491.3+ KB    # 这份DataFrame所占内存，一般只有几百万行数据才考虑内存优化
-None    # df.info()是一个只打印信息、不返回结果的函数，在交互式环境中，函数执行完后会显示 None，完全正常
+None    
+df.info()是一个只打印信息、不返回结果的函数，在交互式环境中函数执行完后会显示None，完全正常
 
-------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
 
 4. df.describe()
 对DataFrame中的数值型列做统计描述，输出 计数、均值、标准差、最值、分位数
-只对数值型列生效（自动跳过字符串 / 时间列）
+只对数值型列生效会自动跳过字符串/时间列
 
 
-
-4.25. df.astype(目标类型)
+4.1 df.astype(目标类型)
 将DataFrame中指定列的数据类型转为目标类型
 
-例如：df["area"] = df["area"].astype("category")
-将area列（字符串）转为category类型（减少内存占用，加速分组）若是str则转换为字符串
+df["area"] = df["area"].astype("category")
+将area列转为category类型（减少内存占用，加速分组）若是str则转换为字符串
 
-目标类型需兼容原数据（如不能将字符串 “abc” 转为 int）
+目标类型需兼容原数据，不能将字符串 “abc” 转为int
 category类型适合重复值多的列，能大幅减少内存占用
 
 
 
-4.5 df[数值列列表].corr()
+4.2 df['用户行为'] = pd.to_numeric(df['用户行为'], errors='coerce')
+将任意类型数据转换为数值类型的函数Series、列表等，输出是数值类型的Series（int或float）
+errors的参数：'coerce'将能转换为数值的内容正常转为int/float，无法转换的内容强制转为NaN
+'raise'（默认）遇到无法转换的直接报错
+'ignore'无法转换的保留原内容，不转换类型
+
+
+
+4.3 df[数值列列表].corr()
 计算多个数值列之间的相关系数
 
 
+4.4 .apply(lambda x: x.sort_values('互动数', ascending=False))  # False表示从高到低的顺序
+对单个用户组内的行，按互动数列降序排序
 
-5. df.isnull().sum()
-统计DataFrame每列的缺失值数量（先判断每个单元格是否缺失，再求和）
 
-df.isnull()：返回和 df 同形状的布尔矩阵（缺失值为True，非缺失为False）
+4.5 df.isnull().sum()统计DataFrame每列的缺失值数量
+
+df.isnull()：返回和df同形状的布尔矩阵（缺失值为True，非缺失为False）
 .sum()：对每列的布尔值求和（True=1，False=0），即每列缺失值个数
 
 
----------------------------------------------------------------------------------------------------------------------------------
+
+4.6 pd.to_datetime(df["时间列"],format="%Y-%m-%d %H:%M:%S")
+将DataFrame中的字符串时间列转为datetime类型
+format：指定原始时间字符串的格式（如 %Y是4位年份，%m是2位月份，%H是24小时制）
+
+
+
+4.7 df["datetime列"].dt.date/month/hour
+从datetime类型的列中，提取日期/月份/小时，必须先转换为datatime类型
+df["date"] = df["time"].dt.date   提取日期（如 2024-05-20）
+df["month"] = df["time"].dt.month   提取月份（1-12）
+df["hour"] = df["time"].dt.hour    提取小时（0-23）
+
+
+
+
+
+
+
+
+5 df.columns = df.columns.str.strip() 去除所有列名前后的空格
+
+
+5.1 unique_user_order = df['用户ID'].unique()
+获取原始数据中用户ID首次出现顺序（用于保持原始顺序）
+
+
+5.2 sorted_df = df.sort_values(by=['用户ID', '博主ID', '时间'])
+按三层维度对数据排序,优先级从高到低,先按用户ID排序
+同一用户ID下，按博主ID顺序；同一用户和博主下，按时间顺序
+
+默认情况下，sort_values会按用户ID的数字/字符串大小排序
+而设置分类类型后，排序会严格遵循分类依据
+
+
+
+5.3 df.rename()用于精准修改 DataFrame 列名或行索引
+df = df.rename(columns={'用户ID (User ID)': '用户ID'}) 修改单个列名
+df = df.rename(
+    columns={
+        '博主ID (Blogger ID)': '博主ID',
+        '观看量 (View)': '观看量',
+        '是否关注 (Follow)': '是否关注',
+        '时间 (Time)': '时间'
+    }
+)    # 同时修改多个列名
+
+df = df.rename(index={'2026-02-25': '日期_20260225'})
+修改行索引名，把行索引“2026-02-25”改为“日期_20260225”
+
+可添加参数
+inplace=False（默认）：返回新的DataFrame，原df保持不变
+inplace=True：直接修改原df，无返回值，无需赋值
+
+
+
+5.4 filtered_df = df[df['互动数'] > 0].copy()    # 筛选互动数>0的行，并创建独立副本
+filtered_df['互动数'] = 1    # 不会改变原来的df
+
+视图：相当于原数据的快捷方式/引用，视图本身不存储数据，只是指向原df中符合条件的行
+副本：通过.copy()创建的独立数据，有自己的内存空间，和原df完全分离
+
+
+
+
+
+
 
 
 6. df.fillna(填充值)
@@ -162,44 +238,46 @@ df["PM2.5"] = df["PM2.5"].fillna(df["PM2.5"].median())
 用PM2.5列的中位数填充该列缺失值
 
 
-6.25 df.drop(columns=["列名",],errors="ignore")
+6.1 df.drop(columns=["列名",],errors="ignore")
 drop默认删除行，可通过columns参数删除列
 errors参数确保容错，使得指定列不存在的时候不会报错
 
 
-6.5. df.dropna(subset=【列名】)
+6.2 df.dropna(subset=[列名])
 删除包含缺失值的行，常用于非数值列，如地区、监测点名称，无法用数值填充
 指定的话哪些列有缺失就删行，不指定得话则删除所有列有缺失的行
 
 
-6.75. df.drop_duplicates(subset=[列名], keep="first")
-删除重复行
-不指定subset：删除 “所有列值都完全相同” 的行
+6.3 df.drop_duplicates(subset=[列名], keep="first") 删除重复行
+不添加参数subset：删除所有列值都完全相同的行
 keep="first"：保留重复行中的第一条，keep="last" 保留最后一条
 
 
----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 
 
 7. 选择单行
 df.loc["A"] 按照标签"A"
-输出：
 姓名    张三
 年龄    25
 城市    北京
 Name: A, dtype: object
+
 姓名  年龄  城市
 A  张三  25  北京     # 行标签A → 位置0
 B  李四  30  上海     # 行标签B → 位置1
 C  王五  35  广州     # 行标签C → 位置2
 
-列标签：姓名 年龄 城市 ，可以改列名
-行标签 A B C ，也可以自定义
+列标签：姓名 年龄 城市 
+行标签 A B C 
 df.iloc[0],输出和上面完全一样，区别是一个按照数字找，一个按照标签找
 
 
 选择单列
-df.loc[:,"年龄"] :表示所有行
+df.loc[:,"年龄"] :这个符号表示所有行
 df.iloc[:,1]  同上
 
 
@@ -214,7 +292,7 @@ iloc同上。可看成矩阵
 
 
 
-7.5 条件筛选
+7.1 条件筛选
 df.loc[df['用户行为'] == 1, '观看量'] = 1
 如果用户行为列值为1，则把观看量列的值设置为1
 
@@ -223,22 +301,24 @@ df.loc[df["年龄"]> 30]
 
 
 
-7.75 df['用户ID'].isin(specific_user_ids) 
+7.2 df['用户ID'].isin(specific_user_ids) 
 作用是逐行判断用户ID列的值是否在指定列表中，返回一个和原DataFrame行数相同的布尔数组
 
 specific_user_ids = [1,2,3] 是你指定的筛选白名单
 
 df[布尔数组]
-pandas支持用布尔数组作为行索引，只保留True对应的行，最终生成新的DataFrame filtered_df
+pandas支持用布尔数组作为行索引，只保留True对应的行，最终生成新的df
 
 .isin()除了列表，还支持元组（(1,2,3)）、数组（np.array([1,2,3])）甚至另一个Series
 
-filtered_df = df[~df['用户ID'].isin(specific_user_ids)]
-反向筛选，只需要加一个~
+filtered_df = df[~df['用户ID'].isin(specific_user_ids)]  反向筛选，只需要加一个~
 等价于filtered_df = df.query("用户ID in @specific_user_ids")
 
 
--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 
 
 8. df.groupby(列名).聚合函数()
@@ -250,62 +330,55 @@ df.groupby(['用户ID', '博主ID', '日期'])
 多列分组+日期,把同一用户在同一天对同一博主的行为记录归为一组
 
 print(df.groupby('用户ID')) 只会显示对象信息，看不到分组内容
-想看小组数据可以用 df.groupby('用户ID').head(2)（看每个组的前 2 行）
+想看小组数据可以用 df.groupby('用户ID').head(2)
 
-多列分组后索引会变成分组键,需要用reset_index()还原为普通列
-分组后聚合默认忽略空值：如果小组内有 NaN，sum/mean 会自动跳过，不影响统计结果
-
+多列分组后索引会变成分组键,需要用reset_index()还原为普通列，分组后聚合默认忽略空值和NaN
 
 
-8.125 df = df.groupby(['用户ID', '博主ID']).apply(custom_agg).reset_index()
 
-apply遍历每个用户+博主分组，把该分组的所有数据传入custom_agg函数
-apply会收集所有分组的聚合结果（每个分组返回一个 pd.Series），并自动拼接成一个新的 DataFrame
+8.1 df = df.groupby(['用户ID', '博主ID']).apply(custom_agg).reset_index()
+
+apply遍历每个用户+博主分组，把该分组的所有数据传入custom_agg函数(自定义的函数)
+apply会收集所有分组的聚合结果（每个分组返回一个pd.Series），并自动拼接成一个新的df
 此时新DataFrame的行索引是用户ID + 博主ID的组合，列是custom_agg返回的值
 
-随后的 .reset_index() 会把原来作为行索引的用户 ID、博主 ID还原成普通列
-生成新的连续数字索引（0、1、2...），让数据结构回到标准的DataFrame形态
+随后 .reset_index()会把原来作为行索引的用户ID、博主 ID还原成普通列
+生成新的连续数字索引，让数据结构回到标准的DataFrame形态
+reset_index(drop=True)，drop=True表示彻底删除排序后残留的旧索引,生成从0开始的连续新索引
 
-custom_agg的返回值要求：必须返回一维结构（如 pd.Series）
-否则apply会生成嵌套数据（比如列里是字典/列表），无法形成规整的表格
+custom_agg的返回值要求：必须返回一维结构,否则apply会生成嵌套数据,无法形成规整的表格
 
 
 
-8.25 result = df.groupby(['用户ID', '博主ID'], as_index=False).agg({
+8.2 result = df.groupby(['用户ID', '博主ID'], as_index=False).agg({
     '观看量': 'sum',
     '点赞量': 'sum',
     '评论量': 'sum',
-    '是否关注': 'max',  #  max更实用——1表示关注过，0表示没关注过
+    '是否关注': 'max',  #  max更实用—1表示关注过，0表示没关注过
     '日期': 'first'
 })
-核心框架：groupby + agg（分组 + 聚合）相比apply+自定义函数更高效、代码更简洁
+groupby + agg（分组 + 聚合）相比apply+自定义函数更高效、代码更简洁
 as_index=False：让分组键直接作为普通列保留在结果中，而非变成行索引替代了reset_index()
 
-
-
 .agg({列名: 聚合方式})
-对每个分组的不同列，执行指定的聚合操作（字典键=列名，值=聚合规则）
+对每个分组的不同列，执行指定的聚合操作,字典键=列名，值=聚合规则
 
+groupby+agg，代码更简洁执行效率更高
+as_index=False一步到位，无需重置索引。仅支持pandas内置的聚合规则，无法处理极复杂的自定义逻辑
 
-本次groupby+agg，代码更简洁（无需写自定义函数）执行效率更高
-as_index=False一步到位，无需额外重置索引。仅支持pandas内置的聚合规则，无法处理极复杂的自定义逻辑
-之前apply+custom_agg支持任意复杂的自定义逻辑（比如条件判断、多步计算）代码冗余
-效率低（尤其是百万行级数据），需要手动reset_index
-
+apply+custom_agg支持任意复杂的自定义逻辑如条件判断、多步计算
+效率低尤其是百万行级数据，需要手动reset_index()
 常用的聚合规则，sum求和，max取最大值，first取第一个值，count计数，mean求平均值	
 
 
 
-
-8.5 pd.read_csv(file_path, chunksize=chunk_size)
+8.3 pd.read_csv(file_path, chunksize=chunk_size)
 若csv文件有几百万行，一次性阅读会占满内存，此时应采取分块读取
 预先设置一个chunk_size=n，必须有循环，否则只会处理一块，然后只针对一块写功能即可
 
 
-
-8.75 pd.concat([final_df, chunk], ignore_index=True) 拼接块
+8.4 pd.concat([final_df, chunk], ignore_index=True) 拼接块
 ignore_index重置索引，默认值为False会导致01234 01234，而非01234 56789
-
 
 chunk_list = []    # 减少concat次数
 for chunk in pd.read_csv(file_path, chunksize=chunk_size):
@@ -313,15 +386,35 @@ for chunk in pd.read_csv(file_path, chunksize=chunk_size):
     chunk_list.append(chunk)
 final_df = pd.concat(chunk_list, ignore_index=True)
 
-
-pd.concat()中第一个参数必须是包含多个待拼接对象的可迭代对象（比如列表、元组）
-不能直接传单个DataFrame
-
+pd.concat()中第一个参数必须是包含多个待拼接对象的可迭代对象
+比如列表、元组，不能直接传一个DataFrame
 pd.concat([df1, df2])	✅传了包含2个DataFrame的列表
 pd.concat(df1)	❌直接传单个DataFrame，不是可迭代对象，会触发TypeError
 
 
-------------------------------------------------------------------------------------------------------------------------------------
+
+8.5 grouped = filtered_df.groupby(   
+    ['用户ID', '博主ID', pd.Grouper(key='时间', freq='D')],  # freq='D'按精确时间(天)分组
+    as_index=False
+)['互动数'].sum()
+# 时间列必须为Datetime，否则Grouper会报错
+
+
+
+8.6 grouped['用户ID'] = pd.Categorical(
+    grouped['用户ID'], 
+    categories=unique_user_order, 
+    ordered=True
+)
+categories：定义有哪些分类+理想顺序
+ordered=True：启用这个理想顺序，让排序/比较遵循该顺序
+
+无序分类False（默认）仅将列标记为分类，但分类之间无先后顺序，排序时仍按分类名的自然顺序
+有序分类True分类之间有明确的先后顺序，排序时严格遵循categories指定的顺序
+
+
+当ordered=True时，用户ID列的分类被标记为有序，分类顺序就是unique_user_order
+若ordered=False，无序分类时无法比较大小
 
 
 
@@ -329,135 +422,38 @@ pd.concat(df1)	❌直接传单个DataFrame，不是可迭代对象，会触发Ty
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-9. df.interpolate(method="linear")
-用插值法填充缺失值（适合时间序列数据，保留数据趋势，比直接填均值更准确）
-
-method="linear"：线性插值（根据缺失值前后的数值，按比例补中间值）
-必须先将时间列转为 datetime 类型，插值才会按时间顺序生效
-
-
-
-
-10. pd.to_datetime(df["时间列"],format="%Y-%m-%d %H:%M:%S")
-将DataFrame中的字符串时间列转为datetime类型
-format：指定原始时间字符串的格式（如 %Y 是 4 位年份，%m 是 2 位月份，%H 是 24 小时制小时）
-
-
-
-
-11. df["datetime列"].dt.date/month/hour
-从 datetime 类型的列中，提取日期/月份/小时
-必须先转换为datatime类型
-
-df["date"] = df["time"].dt.date   提取日期（如 2024-05-20）
-df["month"] = df["time"].dt.month   提取月份（1-12）
-df["hour"] = df["time"].dt.hour    提取小时（0-23）
-
-
-
-
-12. pd.cut(df["数值列"], bins=分界点, labels=标签)
+9. pd.cut(df["数值列"], bins=分界点, labels=标签)
 将数值列按指定分界点分成多个类别，生成新的分类列
 
-将month列（1-12）按月份分成“四季”，生成season列
+将month列按月份分成四季，生成season列
 df["season"] = pd.cut(
     df["month"],
-    bins=[0, 2, 5, 8, 11, 12],  # 分界点：0-2月、3-5月...
-    labels=["冬季", "春季", "夏季", "秋季", "冬季"]  # 对应标签
+    bins=[0, 2, 5, 8, 11, 12],  
+    labels=["冬季", "春季", "夏季", "秋季", "冬季"]  
 )
 
 bins：必须是从小到大的分界点列表
+labels标签数量需比bins少 1（如 bins有6个点，分5组，labels 需5个）
 
-labels标签数量需比bins少 1（如 bins 有 6 个点，分 5 组， labels 需 5 个）
 
 
 
 
 
+10. df.interpolate(method="linear")
+用插值法填充缺失值，适合时间序列数据，保留数据趋势，比直接填均值更准确
 
+method="linear"：线性插值，必须先将时间列转为 datetime 类型，插值才会按时间顺序生效
 
 
 
-1. pd.Series()是 pandas 中表示一维带标签的数据结构（可以通俗理解为 “带名字的一维数组”）
 
-每个值都对应一个「标签（键）」（比如 ' 观看量 ' 对应求和结果，' 日期 ' 对应日期值）；
-它是构成 DataFrame（二维表格）的基础 —— 一个 DataFrame 本质上是多个 Series 按列拼接而成；
 
 
-接收一个字典（键 = 列名，值 = 聚合结果），pd.Series 会把字典转换成带标签的一维数据
+11. pd.Series()是pandas中表示一维带标签的数据结构
+它是构成df的基础，df本质上是多个Series按列拼接而成
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+接收一个字典（键 = 列名，值 = 聚合结果），pd.Series会把字典转换成带标签的一维数据
 
 
 
@@ -472,7 +468,7 @@ labels标签数量需比bins少 1（如 bins 有 6 个点，分 5 组， labels 
 1. df.plot(kind=图表类型, ...)
 快速绘制折线图、柱状图、水平柱状图等
 
-# 绘制PM2.5月度均值的折线图（带标记点）
+# 绘制PM2.5月度均值的折线图
 monthly_avg.plot(kind="line", marker="o", color="#E74C3C", figsize=(12, 6))
 
 kind：指定图表类型（"line" 折线图、"bar" 柱状图、"barh" 水平柱状图）
