@@ -82,6 +82,15 @@ target/
 profile_default/
 ipython_config.py
 
+
+# 忽略数据源文件
+air_pollution.csv
+# 忽略所有png图表
+*.png
+# 忽略指定文本文件
+
+
+
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
 #   intended to run in multiple environments; otherwise, check them in:
