@@ -1,7 +1,8 @@
 
+# 新人用AI写代码，一方面是学习代码编程，一方面也在学习数据分析流程
 # 对原本的代码进行了模块化管理，方便维护和拓展。每个功能块都封装成独立函数，主函数串联整个流程
 
-# 1. 导入依赖（统一放顶部）
+# 导入依赖
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -49,7 +50,7 @@ def clean_missing_values(df, pm_cols):
     #  删除两列存在缺失值的整行数据
     df = df.dropna(subset=["city", "country"])
     
-    #  分层填充（优先级：城市均值 > 国家均值 > 全局中位数）
+    # 分层填充（优先级：城市均值 > 国家均值 > 全局中位数）
     for col in pm_cols:
         # 第一步：用该城市的均值填充（最贴合）
         city_mean = df.groupby("city")[col].transform("mean")
