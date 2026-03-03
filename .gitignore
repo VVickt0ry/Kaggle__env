@@ -83,8 +83,7 @@ profile_default/
 ipython_config.py
 
 
-# 忽略数据源文件
-air_pollution.csv
+
 # 忽略所有png图表
 *.png
 # 忽略指定文本文件
